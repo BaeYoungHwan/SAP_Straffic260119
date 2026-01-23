@@ -1,7 +1,8 @@
-# TeamProjectStraffic_
+# SAP(Subway Amenities Project) 
 
 구글 드라이버 : https://drive.google.com/drive/folders/1DLYen7Q9-ZSXGzDScXDsAwbRymENAAs3
 
+<![alt](doc/설계서/로고/로고.png)>
 스마트 지하철 운영 대시보드 (운영자용 그룹웨어)
 
 -PM
