@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mbc.sap.dao.UserDao">
+	<select id="idcheck" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*)
+		from storage.user
+		where user_id=#{user_id}
+	</select>
+
+	<insert id="adduser" parameterType="com.mbc.sap.dto.UserDto" >
+		insert into storage.user(user_id, user_pw, station_id, station_name, line_name, user_name, user_email, auth)
+		values(#{user_id}, #{user_pw}, #{station_id}, #{station_name}, #{line_name}, #{user_name}, #{user_email}, 5)
+	</insert>
+
+	<select id="search_stationid" parameterType="com.mbc.sap.dto.UserDto" resultType="string">
+    	SELECT 
+        	station_id 
+    	FROM 
+        	storage.local 
+    	WHERE 
+        	station_name = #{station_name}
+    	<if test="line_name != null and line_name != ''">
+        	AND line_name = #{line_name}
+    	</if>
+	</select>
+	
+	<select id="getstationbyline" parameterType="string" resultType="map">
+    	SELECT DISTINCT station_name, station_id 
+    	FROM storage.local 
+    	WHERE line_name = #{line_name}
+	</select>
+
+	<select id="login" parameterType="com.mbc.sap.dto.UserDto" resultType="com.mbc.sap.dto.UserDto">	
+		select user_id, user_name, user_email, auth
+		from storage.user
+		where user_id=#{user_id} and user_pw=#{user_pw}
+	</select>	
+	
+</mapper>
