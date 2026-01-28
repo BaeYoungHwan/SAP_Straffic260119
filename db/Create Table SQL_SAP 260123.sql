@@ -76,18 +76,18 @@ select * from storage.locker_usage order by locker_usage.created_at desc
 -- drop table storage.user;
 
 select * from storage.user;
-select * from storage.insident_comment;
+select * from storage.incident_comment;
 
 -- 장애/발생 테이블 생성
--- Create Table storage.insident(
+-- Create Table storage.incident(
 
--- 	insident_id				SERIAL		 	PRIMARY KEY,
--- 	insident_title			VARCHAR(30)		not null,
--- 	insident_line_name		VARCHAR(10),
--- 	insident_station_id 	VARCHAR(10)		not null,
--- 	insident_station_name	VARCHAR(100),
--- 	insident_content		VARCHAR(1000),
--- 	insident_status			VARCHAR(10)		not null,
+-- 	incident_id				SERIAL		 	PRIMARY KEY,
+-- 	incident_title			VARCHAR(30)		not null,
+-- 	incident_line_name		VARCHAR(10),
+-- 	incident_station_id 	VARCHAR(10)		not null,
+-- 	incident_station_name	VARCHAR(100),
+-- 	incident_content		VARCHAR(1000),
+-- 	incident_status			VARCHAR(10)		not null,
 -- 	user_id					VARCHAR(20)		not null,
 -- 	user_name				VARCHAR(10),
 -- 	create_at				TIMESTAMP 		DEFAULT CURRENT_TIMESTAMP,
@@ -98,16 +98,16 @@ select * from storage.insident_comment;
 
 
 -- 댓글 테이블 생성
--- Create Table storage.insident_comment(
+-- Create Table storage.incident_comment(
 
 -- 	comment_id				SERIAL		 	PRIMARY KEY,
--- 	insident_id				int				not null,
+-- 	incident_id				int				not null,
 -- 	comment_content			VARCHAR(1000)	not null,
 -- 	user_id					VARCHAR(20)		not null,
 -- 	user_name				VARCHAR(10),
 -- 	create_at				TIMESTAMP 		DEFAULT CURRENT_TIMESTAMP,
 -- 	FOREIGN KEY (user_id) REFERENCES storage.user(user_id),
--- 	FOREIGN KEY (insident_id) REFERENCES storage.insident(insident_id)
+-- 	FOREIGN KEY (incident_id) REFERENCES storage.incident(incident_id)
 	
 -- );
 
