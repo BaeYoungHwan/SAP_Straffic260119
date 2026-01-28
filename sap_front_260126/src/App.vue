@@ -1,9 +1,11 @@
 <template>
   <div v-if="!isLoggedIn" class="login-fullscreen-container">
-    <component 
-      :is="views['Login']" 
-      @login-success="handleLoginSuccess" 
-    />
+      <Login v-if="currentView === 'Login'" 
+         @login-success="handleLoginSuccess"
+         @go-regi="currentView = 'Regi'" />
+
+      <Regi v-if="currentView === 'Regi'" 
+        @go-login="currentView = 'Login'" />
   </div>
 
   <div v-else class="layout" :class="'line_name-' + userData.line_name">
@@ -69,9 +71,10 @@ import Home from './views/HomeView.vue';
 import Dashboard from './views/DashboardView.vue';
 import Settings from './views/SettingsView.vue';
 import Login from './views/LoginView.vue';
+import Regi from './views/regi.vue';
 
-const views = { Home, Dashboard, Settings, Login };
-const currentView = ref('Home'); // 로그인 후 첫 화면
+const views = { Home, Dashboard, Settings, Login, Regi};
+const currentView = ref('Login'); // 로그인 후 첫 화면
 const isLoggedIn = ref(false); // 초기값은 false
 
 const userData = reactive({

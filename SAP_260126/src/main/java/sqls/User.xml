@@ -11,7 +11,7 @@
 
 	<insert id="adduser" parameterType="com.mbc.sap.dto.UserDto" >
 		insert into storage.user(user_id, user_pw, station_id, station_name, line_name, user_name, user_email, auth)
-		values(#{user_id}, #{user_pw}, #{station_id}, #{station_name}, #{line_name}, #{user_name}, #{user_email}, 5)
+		values(#{user_id}, #{user_pw}, #{station_id}, #{station_name}, #{line_name}, #{user_name}, #{user_email}, 3)
 	</insert>
 
 	<select id="search_stationid" parameterType="com.mbc.sap.dto.UserDto" resultType="string">
@@ -26,16 +26,25 @@
     	</if>
 	</select>
 	
-	<select id="getstationbyline" parameterType="string" resultType="map">
+	<select id="getstationname" parameterType="string" resultType="map">
     	SELECT DISTINCT station_name, station_id 
     	FROM storage.local 
     	WHERE line_name = #{line_name}
 	</select>
 
-	<select id="login" parameterType="com.mbc.sap.dto.UserDto" resultType="com.mbc.sap.dto.UserDto">	
+	<resultMap id="UserMap" type="com.mbc.sap.dto.UserDto">
+    	<id column="user_id" property="user_id"/>
+    	<result column="user_pw" property="user_pw"/>
+    	<result column="user_name" property="user_name"/>
+    	<result column="user_email" property="user_email"/>
+   		<result column="auth" property="auth"/>
+	</resultMap>
+
+	<select id="login" parameterType="com.mbc.sap.dto.UserDto" resultMap="UserMap">	
 		select *
 		from storage.user
-		where user_id=#{user_id} <!--and user_pw=#{user_pw}-->
+		where user_id=#{user_id} and user_pw=#{user_pw} 
+		and auth IN ('1', '2') 
 	</select>	
 	
 </mapper>

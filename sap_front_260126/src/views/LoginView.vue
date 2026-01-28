@@ -32,7 +32,11 @@
       <button class="login-btn" @click="login">로그인</button>
 
       <!-- 회원가입 텍스트 (이동만) -->
-      <div class="join-text">회원가입</div>
+      <div class="join-text">
+            <p @click="$emit('go-regi')" style="cursor:pointer">
+                회원가입
+            </p>
+      </div>
 
     </div>
   </div>
@@ -42,6 +46,7 @@
 import { useCookies } from 'vue3-cookies';
 const { cookies } = useCookies();
 import axios from 'axios'
+import regi from './Regi.vue';
 
 export default{
   data() {
@@ -79,11 +84,11 @@ export default{
         axios.post('http://localhost:9000/check_login', null, param)
             .then(resp=>{
                 // alert(resp.data);
-                alert(JSON.stringify(resp.data));
+                // alert(JSON.stringify(resp.data));
                 let user = resp.data;
 
                 if(user.user_id === undefined){
-                  alert('아이디 또는 비밀번호를 확인하세요');
+                  alert('아이디 또는 비밀번호가 틀렸거나 아직 승인대기중입니다');
                   return;
                 }
 
@@ -92,14 +97,15 @@ export default{
                 if(location === null || location === " "){
                   location = '/';
                 }
-
-                this.$router.push(location)
+                alert('로그인성공');
+                this.$emit('login-success');
             })
             .catch(err=>{
               alert(err);
             })
         
-      }
+      },
+    
   },
 }
 </script>
