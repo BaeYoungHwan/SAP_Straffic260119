@@ -33,9 +33,9 @@
 	</select>
 
 	<select id="login" parameterType="com.mbc.sap.dto.UserDto" resultType="com.mbc.sap.dto.UserDto">	
-		select user_id, user_name, user_email, auth
+		select *
 		from storage.user
-		where user_id=#{user_id} and user_pw=#{user_pw}
+		where user_id=#{user_id} <!--and user_pw=#{user_pw}-->
 	</select>	
 	
 </mapper>

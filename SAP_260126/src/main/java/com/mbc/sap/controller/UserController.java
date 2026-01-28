@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,9 +27,11 @@ public class UserController {
 	@PostMapping("check_login") // 기능_기능설명
 	public UserDto login(UserDto dto, HttpSession session) {
 		System.out.println("UserController login " + new Date());
+		System.out.println("전달된 데이터: " + dto.toString()); // 데이터 유입 확인용
 		
 		UserDto user = service.login(dto);
-		
+		System.out.println(service.login(dto));
+		System.out.println(user);
 		if(user != null) {
 			session.setAttribute("login", user);
 		}
