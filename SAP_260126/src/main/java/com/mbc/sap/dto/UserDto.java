@@ -8,14 +8,14 @@ public class UserDto {
 	private String line_name;
 	private String user_name;
 	private String user_email;
-	private int auth;
+	private String auth;
 	
 	public UserDto() {
 		
 	}
 
 	public UserDto(String user_id, String user_pw, String station_id, String station_name, String line_name,
-			String user_name, String user_email, int auth) {
+			String user_name, String user_email, String auth) {
 		super();
 		this.user_id = user_id;
 		this.user_pw = user_pw;
@@ -83,11 +83,11 @@ public class UserDto {
 		this.user_email = user_email;
 	}
 
-	public int getAuth() {
+	public String getAuth() {
 		return auth;
 	}
 
-	public void setAuth(int auth) {
+	public void setAuth(String auth) {
 		this.auth = auth;
 	}
 
