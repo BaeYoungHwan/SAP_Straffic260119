@@ -59,6 +59,23 @@
         user_email = #{user_email}
     WHERE 
         user_id = #{user_id}
-</update>
+	</update>
+	
+	<select id="get_newuserlist" parameterType="com.mbc.sap.dto.UserParam" resultType="com.mbc.sap.dto.UserDto">
+    SELECT 
+        user_id, 
+        user_name, 
+        line_name, 
+        station_name, 
+        auth
+    FROM storage.user
+    WHERE auth = '3'  ORDER BY user_id DESC
+    LIMIT 5 OFFSET #{offset}
+</select>
+
+<select id="count_newuser" resultType="Integer">
+    SELECT COUNT(*) 
+    FROM storage.user 
+    WHERE auth = '3'  </select>
 	
 </mapper>

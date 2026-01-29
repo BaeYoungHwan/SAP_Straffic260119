@@ -28,7 +28,7 @@
               <span class="u-sep"> | </span>
            
               <button @click="logout" class="logout-small-btn">로그아웃</button>
-              <span class="user-avatar" @click="currentView = 'my'" style="cursor:pointer">  |  👤</span>
+              <span class="user-avatar" @click="currentView = 'my'" style="cursor:pointer">   <img :src="mypageimage" alt="mypageimage" class="header-mypageimage" /></span>
             </div>
          
           </div>
@@ -49,7 +49,7 @@
           <div class="nav-item" @click="currentView = 'Dashboard'" :class="{ active: currentView === 'Dashboard' }">▶역별현황</div>
           <div class="nav-item" @click="currentView = 'analysis'" :class="{ active: currentView === 'analysis' }">▶통계 분석</div>
           <div class="nav-item" @click="currentView = 'Issue'" :class="{ active: currentView === 'Issue' }">▶장애/이슈</div>
-          <div class="nav-item" @click="currentView = 'Settings'" :class="{ active: currentView === 'Settings' }">▶사용자 관리</div>
+          <div class="nav-item" @click="currentView = 'management'" :class="{ active: currentView === 'management' }">▶사용자 관리</div>
         </nav>
       </aside>
 
@@ -61,26 +61,45 @@
       </main>
     </div>
 
-    <footer class="footer">
-      <p>© 2026 SAP_Straffic | Smart Storage Management System</p>
-    </footer>
+   <footer class="footer">
+  <div class="footer-content">
+    <img :src="logofooter" alt="footer logo" class="footer-inline-logo" />
+    <span class="copyright">
+      <table>
+        <tr>
+          <td>배영환 | Project Manger | uee8351773@naver.com</td>
+        </tr>
+         <tr>
+          <td>김소연 | Consultant     | www.linkedin.com/in/souyeon-kim-735996394</td>
+        </tr>
+        <tr>
+          <td>송원호 | Developer      | dnjsghman@naver.com</td>
+        </tr>
+         <tr>
+          <td>오창석 | Developer      | dhckdtjr11@naver.com</td>
+        </tr>
+      </table>
+    </span>
+  </div>
+</footer>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import logo from './assets/로고.png'
-
+import logofooter from './assets/로고 글자.png'
+import mypageimage from './assets/마이페이지(W).png'
 // 뷰 컴포넌트 임포트
 import Home from './views/HomeView.vue';
 import Dashboard from './views/DashboardView.vue';
-import Settings from './views/SettingsView.vue';
+import management from './views/management.vue';
 import Login from './views/LoginView.vue';
 import Regi from './views/regi.vue';
 import myedit from './views/myedit.vue';
 import my from './views/my.vue';
 // 컴포넌트 매핑
-const views = { Home, Dashboard, Settings, Login, Regi , myedit,my};
+const views = { Home, Dashboard, management, Login, Regi , myedit,my};
 const currentView = ref('Login');
 const isLoggedIn = ref(false);
 
@@ -218,7 +237,6 @@ body { overflow: hidden; } /* 스크롤 방지 */
   width: 250px; /* 로고 글자 이미지의 적절한 너비 */
   height: 100%;
   
-  background-image: url('./assets/로고 글자.png');
   background-repeat: no-repeat;
   background-position: center right;
   background-size: contain; /* 영역 안에서 비율 유지 */
@@ -241,7 +259,37 @@ body { overflow: hidden; } /* 스크롤 방지 */
 .nav-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; transition: 0.2s; color: #2c3e50; }
 .nav-item.active { background-color: #42b983; color: white; font-weight: bold; }
 .content { flex: 1; padding: 30px; overflow-y: auto; background-color: #fcfcfc; }
+.footer {
+  height: 40px;
+  background-color: #eee;
+  display: flex;
+  align-items: center;    
+  justify-content: center; 
+ 
+}
 
+.footer-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;          
+  color: white;
+}
+
+.footer-inline-logo {
+  height: 80px;       
+  width: auto;         
+  display: inline-block; 
+  vertical-align: middle; 
+
+}
+.footer .copyright table {
+  color: white;
+  border-collapse: collapse;
+}
+.copyright {
+  font-size: 0.8rem;
+  color: #666;
+}
 /* --- 호선별 테마 스타일 (헤더 + 사이드바 + 활성 메뉴 세트) --- */
 
 /* 1호선 */  /*header-left-col*/
@@ -299,7 +347,16 @@ body { overflow: hidden; } /* 스크롤 방지 */
   color: #555;
   font-weight: 500;
 }
-
+/* 마이페이지 아이콘 */
+.header-mypageimage {
+  width: 32px;  
+  height: 32px; 
+  object-fit: cover; 
+  border-radius: 50%; 
+  vertical-align: middle; 
+  margin-left: 10px;
+  transition: transform 0.2s; 
+}
 .nav-item:hover:not(.active) {
   background-color: rgba(0, 0, 0, 0.05); /* 마우스 올렸을 때 살짝 어두워짐 */
 }
@@ -337,5 +394,5 @@ body { overflow: hidden; }
 .nav-item { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; color: #555; }
 .nav-item.active { color: white !important; font-weight: bold; }
 
-.footer { height: 40px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+.footer { height: 100px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
 </style>

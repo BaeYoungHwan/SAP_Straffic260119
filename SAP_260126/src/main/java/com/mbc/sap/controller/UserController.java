@@ -1,6 +1,7 @@
 package com.mbc.sap.controller;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mbc.sap.dto.UserDto;
+import com.mbc.sap.dto.UserParam;
 import com.mbc.sap.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -96,4 +98,23 @@ public class UserController {
         }
     }
 	
+    @GetMapping("get_newuserlist")
+    public Map<String, Object> getNewUserList(UserParam param) {
+        System.out.println("요청된 페이지: " + param.getPageNumber());
+        
+        // 1. 서비스 호출 (LIMIT 5 OFFSET #{offset})
+        List<UserDto> list = service.get_newuserlist(param);
+        
+        // 2. 전체 대기자 수 (전체 행 개수)
+        int count = service.count_newuser();
+        
+        // 3. 응답 맵 구성
+        Map<String, Object> map = new HashMap<>();
+        map.put("newuserlist", list);  // 데이터 리스트
+        map.put("cnt", count);         // 전체 개수 (Total Count)
+        map.put("curPage", param.getPageNumber()); // 현재 페이지 번호 저장용
+        
+        return map;
+    }
+    
 }

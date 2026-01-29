@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mbc.sap.dao.UserDao;
 import com.mbc.sap.dto.UserDto;
+import com.mbc.sap.dto.UserParam;
 
 @Service
 @Transactional
@@ -41,4 +42,11 @@ public class UserService {
 
 		return dao.update_user(dto)>0;
 	}
+
+	public List<UserDto> get_newuserlist(UserParam param) {
+		return dao.get_newuserlist();}
+
+	public int count_newuser() {
+		return dao.count_newuser();}
+
 }

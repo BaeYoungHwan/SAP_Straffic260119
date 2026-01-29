@@ -17,4 +17,6 @@ public interface UserDao {
 	List<String> search_stationid(UserDto dto);
 	List<Map<String, Object>> getstationname(String line_name);
 	int update_user(UserDto dto);
+	List<UserDto> get_newuserlist();
+	int count_newuser();
 }
