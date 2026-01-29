@@ -5,7 +5,8 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import regi from '../views/regi.vue'
-
+import my from '../views/my.vue'
+import myedit from '../views/myedit.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -30,8 +31,16 @@ const router = createRouter({
       component: regi
     },
     {
-      
+       path: '/user/my', 
+      name: 'my', 
+      component: my
+    },
+       {
+       path: '/user/my/edit', 
+      name: 'myedit', 
+      component: myedit
     }
+
   ]
 })
 

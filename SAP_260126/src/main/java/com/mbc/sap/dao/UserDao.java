@@ -16,5 +16,5 @@ public interface UserDao {
 	int adduser(UserDto dto);
 	List<String> search_stationid(UserDto dto);
 	List<Map<String, Object>> getstationname(String line_name);
-	
+	int update_user(UserDto dto);
 }

@@ -46,7 +46,7 @@
 import { useCookies } from 'vue3-cookies';
 const { cookies } = useCookies();
 import axios from 'axios'
-import regi from './Regi.vue';
+import Regi from './regi.vue';
 
 export default{
   data() {
@@ -54,6 +54,7 @@ export default{
       user_id : '',
       user_pw : '',
       save_id : false,
+      user_email:''
     }
   },
   mounted(){
@@ -67,46 +68,51 @@ export default{
     }
   },
   methods: {
+      //유저아이디 저장
       saveId(){
-        if(this.save_id === false && this.id.trim() !== ""){
-          cookies.set("userId", this.user_id);
-        }else{
-          cookies.remove("userId");
-        }
+       if (this.save_id === false && this.user_id.trim() !== "") {
+      cookies.set("userId", this.user_id);
+      } else {
+      cookies.remove("userId");
+       }
       },
       login(){
-        let param = { 
-            params:{
-                user_id: this.user_id,
-                user_pw: this.user_pw,
-            } 
+        let param = {
+         params: {
+        user_id: this.user_id,
+        user_pw: this.user_pw,
           }
-        axios.post('http://localhost:9000/check_login', null, param)
-            .then(resp=>{
-                // alert(resp.data);
-                // alert(JSON.stringify(resp.data));
-                let user = resp.data;
+       }
+      axios.post('http://localhost:9000/check_login', null, param)
+      .then(resp => {
+        let user = resp.data;
 
-                if(user.user_id === undefined){
-                  alert('아이디 또는 비밀번호가 틀렸거나 아직 승인대기중입니다');
-                  return;
-                }
+        // 백엔드 응답 데이터 확인 (id가 아니라 user_id로 올 확률이 높음)
+        if (!user || user.user_id === undefined) {
+          alert('아이디 또는 비밀번호가 틀렸거나 아직 승인대기중입니다');
+          return;
+        }
 
-                sessionStorage.setItem("login", JSON.stringify(user));
-                let location = sessionStorage.getItem("location");
-                if(location === null || location === " "){
-                  location = '/';
-                }
-                alert('로그인성공');
-                this.$emit('login-success');
-            })
-            .catch(err=>{
-              alert(err);
-            })
+        // 세션 저장
+        sessionStorage.setItem("login", JSON.stringify(user));
         
-      },
-    
+        alert('로그인 성공');
+
+        
+        this.$emit('login-success', {
+          id: user.user_id,          
+          name: user.user_name,      
+          line_name: user.line_name,
+          station_name: user.station_name,
+          user_email: user.user_email
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        alert('서버 연결에 실패했습니다.');
+      })
   },
+},
 }
 </script>
 

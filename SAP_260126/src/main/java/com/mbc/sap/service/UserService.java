@@ -36,4 +36,9 @@ public class UserService {
 	public List<Map<String, Object>> getstationname(String line_name){
 		return dao.getstationname(line_name);
 	}
+
+	public boolean update_user(UserDto dto) {
+
+		return dao.update_user(dto)>0;
+	}
 }

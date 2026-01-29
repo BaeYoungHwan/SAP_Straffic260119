@@ -6,6 +6,7 @@
 
       <Regi v-if="currentView === 'Regi'" 
         @go-login="currentView = 'Login'" />
+        
   </div>
 
   <div v-else class="layout" :class="'line_name-' + userData.line_name">
@@ -21,13 +22,13 @@
           <div class="user-profile-box">
           
             <div class="user-details-row">
-              <span class="u-id">ID: {{ userData.id }}</span>
-              <span class="u-sep"> | </span>
-              <span class="u-station">{{ userData.station_name }}</span>
-              <span class="u-sep"> | </span>
               <span class="u-name">{{ userData.name }} 관리자     </span>
+              <span class="u-sep"> | </span>
+              <span class="u-station">{{ userData.station_name }}역</span>
+              <span class="u-sep"> | </span>
+           
               <button @click="logout" class="logout-small-btn">로그아웃</button>
-              <span class="user-avatar">  |  👤</span>
+              <span class="user-avatar" @click="currentView = 'my'" style="cursor:pointer">  |  👤</span>
             </div>
          
           </div>
@@ -52,8 +53,11 @@
         </nav>
       </aside>
 
-      <main class="content">
-        <component :is="views[currentView]" />
+    <main class="content">
+    <component 
+    :is="views[currentView]" 
+    :key="currentView" 
+    @change-view="currentView = $event" />
       </main>
     </div>
 
@@ -64,19 +68,23 @@
 </template>
 
 <script setup>
+import { ref, reactive, onMounted } from 'vue';
 import logo from './assets/로고.png'
-import { ref, reactive } from 'vue';
 
+// 뷰 컴포넌트 임포트
 import Home from './views/HomeView.vue';
 import Dashboard from './views/DashboardView.vue';
 import Settings from './views/SettingsView.vue';
 import Login from './views/LoginView.vue';
 import Regi from './views/regi.vue';
+import myedit from './views/myedit.vue';
+import my from './views/my.vue';
+// 컴포넌트 매핑
+const views = { Home, Dashboard, Settings, Login, Regi , myedit,my};
+const currentView = ref('Login');
+const isLoggedIn = ref(false);
 
-const views = { Home, Dashboard, Settings, Login, Regi};
-const currentView = ref('Login'); // 로그인 후 첫 화면
-const isLoggedIn = ref(false); // 초기값은 false
-
+// 사용자 데이터 초기화
 const userData = reactive({
   id: '',
   name: '',
@@ -84,20 +92,47 @@ const userData = reactive({
   station_name: ''
 });
 
-const handleLoginSuccess = (payload) => {
-  userData.id = payload.id;
-  userData.name = payload.name;
-  userData.line_name = payload.line_name;
-  userData.station_name = payload.station_name || '미지정 역';
-  isLoggedIn.value = true; // 레이아웃 전환
+// 데이터 적용 공통 함수
+const applyUserData = (payload) => {
+  if (!payload) return;
+
+  userData.id = payload.user_id || payload.id || '';
+  userData.name = payload.user_name || payload.name || '';
+  userData.line_name = payload.line_name || 'default';
+  userData.station_name = payload.station_name || '';
+  userData.user_email = payload.user_email || '';
+  isLoggedIn.value = true;
   currentView.value = 'Home';
 };
+// 새로고침 시 세션 정보 복구
+onMounted(() => {
+  const savedUser = sessionStorage.getItem("user_info");
+  if (savedUser) {
+    try {
+      const payload = JSON.parse(savedUser);
+      applyUserData(payload);
+    } catch (e) {
+      console.error("세션 데이터 파싱 에러:", e);
+      sessionStorage.removeItem("user_info");
+    }
+  }
+});
+// 로그인 성공 핸들러
+const handleLoginSuccess = (payload) => {
 
+  applyUserData(payload);
+  sessionStorage.setItem("user_info", JSON.stringify(payload));
+};
+
+// 로그아웃
 const logout = () => {
-  isLoggedIn.value = false; // 로그인 화면으로 완전 전환
+  isLoggedIn.value = false;
   userData.id = '';
   userData.name = '';
   userData.line_name = 'default';
+  //세션삭제
+  sessionStorage.removeItem("user_info");
+  currentView.value = 'Login';
 };
 </script>
 
@@ -210,50 +245,50 @@ body { overflow: hidden; } /* 스크롤 방지 */
 /* --- 호선별 테마 스타일 (헤더 + 사이드바 + 활성 메뉴 세트) --- */
 
 /* 1호선 */  /*header-left-col*/
-.layout.line_name-1 .header { background-color: #2a317c !important; }
-.layout.line_name-1 .sidebar { background-color: #eef1f7 !important; }
-.layout.line_name-1 .nav-item.active { background-color: #2a317c !important; color: white !important; }
-.layout.line_name-1 .footer { background-color: #2a317c !important; }
+.layout.line_name-1호선 .header { background-color: #2a317c !important; }
+.layout.line_name-1호선 .sidebar { background-color: #eef1f7 !important; }
+.layout.line_name-1호선 .nav-item.active { background-color: #2a317c !important; color: white !important; }
+.layout.line_name-1호선 .footer { background-color: #2a317c !important; }
 /* 2호선 */
-.layout.line_name-2 .header { background-color: #2fae35 !important; }
-.layout.line_name-2 .sidebar { background-color: #eff7ef !important; }
-.layout.line_name-2 .nav-item.active { background-color: #2fae35 !important; color: white !important; }
-.layout.line_name-2 .footer { background-color: #2fae35 !important; }
+.layout.line_name-2호선 .header { background-color: #2fae35 !important; }
+.layout.line_name-2호선 .sidebar { background-color: #eff7ef !important; }
+.layout.line_name-2호선 .nav-item.active { background-color: #2fae35 !important; color: white !important; }
+.layout.line_name-2호선 .footer { background-color: #2fae35 !important; }
 /* 3호선 */
-.layout.line_name-3 .header { background-color: #ff6000 !important; }
-.layout.line_name-3 .sidebar { background-color: #fff6f0 !important; }
-.layout.line_name-3 .nav-item.active { background-color: #ff6000 !important; color: white !important; }
-.layout.line_name-3 .footer { background-color: #ff6000 !important; }
+.layout.line_name-3호선 .header { background-color: #ff6000 !important; }
+.layout.line_name-3호선 .sidebar { background-color: #fff6f0 !important; }
+.layout.line_name-3호선 .nav-item.active { background-color: #ff6000 !important; color: white !important; }
+.layout.line_name-3호선 .footer { background-color: #ff6000 !important; }
 /* 4호선 */
-.layout.line_name-4 .header { background-color: #1a97dd !important; }
-.layout.line_name-4 .sidebar { background-color: #f0f9ff !important; }
-.layout.line_name-4 .nav-item.active { background-color: #1a97dd !important; color: white !important; }
-.layout.line_name-4 .footer { background-color: #1a97dd !important; }
+.layout.line_name-4호선 .header { background-color: #1a97dd !important; }
+.layout.line_name-4호선 .sidebar { background-color: #f0f9ff !important; }
+.layout.line_name-4호선 .nav-item.active { background-color: #1a97dd !important; color: white !important; }
+.layout.line_name-4호선 .footer { background-color: #1a97dd !important; }
 /* 5호선 */
-.layout.line_name-5 .header { background-color: #822fe1 !important; }
-.layout.line_name-5 .sidebar { background-color: #f8f2ff !important; }
-.layout.line_name-5 .nav-item.active { background-color: #822fe1 !important; color: white !important; }
-.layout.line_name-5 .footer { background-color: #822fe1 !important; }
+.layout.line_name-5호선 .header { background-color: #822fe1 !important; }
+.layout.line_name-5호선 .sidebar { background-color: #f8f2ff !important; }
+.layout.line_name-5호선 .nav-item.active { background-color: #822fe1 !important; color: white !important; }
+.layout.line_name-5호선 .footer { background-color: #822fe1 !important; }
 /* 6호선 */
-.layout.line_name-6 .header { background-color: #ae4908 !important; }
-.layout.line_name-6 .sidebar { background-color: #f9f4f1 !important; }
-.layout.line_name-6 .nav-item.active { background-color: #ae4908 !important; color: white !important; }
-.layout.line_name-6 .footer { background-color: #ae4908 !important; }
+.layout.line_name-6호선 .header { background-color: #ae4908 !important; }
+.layout.line_name-6호선 .sidebar { background-color: #f9f4f1 !important; }
+.layout.line_name-6호선 .nav-item.active { background-color: #ae4908 !important; color: white !important; }
+.layout.line_name-6호선 .footer { background-color: #ae4908 !important; }
 /* 7호선 */
-.layout.line_name-7 .header { background-color: #636b10 !important; }
-.layout.line_name-7 .sidebar { background-color: #f8f9f0 !important; }
-.layout.line_name-7 .nav-item.active { background-color: #636b10 !important; color: white !important; }
-.layout.line_name-7 .footer { background-color: #636b10 !important; }
+.layout.line_name-7호선 .header { background-color: #636b10 !important; }
+.layout.line_name-7호선 .sidebar { background-color: #f8f9f0 !important; }
+.layout.line_name-7호선 .nav-item.active { background-color: #636b10 !important; color: white !important; }
+.layout.line_name-7호선 .footer { background-color: #636b10 !important; }
 /* 8호선 */
-.layout.line_name-8 .header { background-color: #e6265b !important; }
-.layout.line_name-8 .sidebar { background-color: #fff0f4 !important; }
-.layout.line_name-8 .nav-item.active { background-color: #e6265b !important; color: white !important; }
-.layout.line_name-8 .footer { background-color: #e6265b !important; }
+.layout.line_name-8호선 .header { background-color: #e6265b !important; }
+.layout.line_name-8호선 .sidebar { background-color: #fff0f4 !important; }
+.layout.line_name-8호선 .nav-item.active { background-color: #e6265b !important; color: white !important; }
+.layout.line_name-8호선 .footer { background-color: #e6265b !important; }
 /* 9호선 */
-.layout.line_name-9 .header { background-color: #bdb092 !important; }
-.layout.line_name-9 .sidebar { background-color: #f9f8f4 !important; }
-.layout.line_name-9 .nav-item.active { background-color: #bdb092 !important; color: white !important; }
-.layout.line_name-9 .footer { background-color: #bdb092 !important; }
+.layout.line_name-9호선 .header { background-color: #bdb092 !important; }
+.layout.line_name-9호선 .sidebar { background-color: #f9f8f4 !important; }
+.layout.line_name-9호선 .nav-item.active { background-color: #bdb092 !important; color: white !important; }
+.layout.line_name-9호선 .footer { background-color: #bdb092 !important; }
 /* 공통 nav-item 스타일 보완 */
 .nav-item {
   padding: 12px;

@@ -32,15 +32,16 @@
     	WHERE line_name = #{line_name}
 	</select>
 
-<resultMap id="UserMap" type="com.mbc.sap.dto.UserDto">
-    <id column="user_id" property="user_id"/> <result column="user_pw" property="user_pw"/>
-    <result column="station_id" property="station_id" />
-    <result column="station_name" property="station_name" />
-    <result column="line_name" property="line_name" />
-    <result column="user_name" property="user_name"/>
-    <result column="user_email" property="user_email"/>
-    <result column="auth" property="auth"/>     
-</resultMap>
+	<resultMap id="UserMap" type="com.mbc.sap.dto.UserDto">
+    	<id column="user_id" property="user_id"/>
+    	<result column="user_pw" property="user_pw"/>
+    	<result column="user_name" property="user_name"/>
+    	<result column="user_email" property="user_email"/>
+   		<result column="auth" property="auth"/>		
+   		<result column="station_id" property="station_id" />
+    	<result column="station_name" property="station_name" />
+    	<result column="line_name" property="line_name" />
+	</resultMap>
 
 	<select id="login" parameterType="com.mbc.sap.dto.UserDto" resultMap="UserMap">	
 		select *
@@ -48,17 +49,5 @@
 		where user_id=#{user_id} and user_pw=#{user_pw} 
 		and auth IN ('1', '2') 
 	</select>	
-
-	<update id="update_user" parameterType="com.mbc.sap.dto.UserDto">
-    UPDATE storage.user
-    SET 
-        user_pw = #{user_pw},
-        station_id = #{station_id},
-        station_name = #{station_name},
-        line_name = #{line_name},
-        user_email = #{user_email}
-    WHERE 
-        user_id = #{user_id}
-</update>
 	
 </mapper>

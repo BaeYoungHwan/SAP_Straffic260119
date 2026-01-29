@@ -82,7 +82,18 @@ public class UserController {
 		
 		return service.getstationname(line_name);
 	}
-	
-	
+    @PostMapping("update_user") 
+    public String update_user(@RequestBody UserDto dto) {
+        
+        System.out.println("전달받은 데이터 확인: " + dto.toString()); 
+        
+        boolean isS = service.update_user(dto);
+        
+        if(isS) {
+            return "YES";
+        } else {
+            return "NO";
+        }
+    }
 	
 }
