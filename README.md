@@ -2,7 +2,7 @@
 
 구글 드라이버 : https://drive.google.com/drive/folders/1DLYen7Q9-ZSXGzDScXDsAwbRymENAAs3
 
-<img src="./doc/설계서/로고/로고.png" width="400px" alt="logo image">
+<img src="./doc/설계서/이미지/로고.png" width="400px" alt="logo image">
 스마트 지하철 운영 대시보드 (운영자용 그룹웨어)
 
 -PM
