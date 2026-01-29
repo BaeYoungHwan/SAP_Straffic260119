@@ -88,6 +88,7 @@ select * from storage.incident_comment;
 -- 	incident_station_name	VARCHAR(100),
 -- 	incident_content		VARCHAR(1000),
 -- 	incident_status			VARCHAR(10)		not null,
+-- 	incident_severity	 	VARCHAR(10)		not null,
 -- 	user_id					VARCHAR(20)		not null,
 -- 	user_name				VARCHAR(10),
 -- 	create_at				TIMESTAMP 		DEFAULT CURRENT_TIMESTAMP,
@@ -95,6 +96,9 @@ select * from storage.incident_comment;
 -- 	FOREIGN KEY (user_id) REFERENCES storage.user(user_id)
 	
 -- );
+
+-- drop table storage.incident;
+-- drop table storage.incident_comment;
 
 
 -- 댓글 테이블 생성
