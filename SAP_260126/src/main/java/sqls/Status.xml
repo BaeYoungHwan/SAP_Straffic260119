@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- MyBatis는 Snake(_)인식이 안되므로 강제변환(resultmap) 사용-->
+<mapper namespace="com.mbc.sap.dao.StatusDao">
+	<resultMap id="StatusResultMap" type="com.mbc.sap.dto.StatusDto">
+		<result column="station_name" property="station_name"/>
+        <result column="line_name" property="line_name"/>
+        <result column="incident_count" property="incident_count"/>
+        <result column="total_lockers" property="total_lockers"/>
+        <result column="used_lockers" property="used_lockers"/>
+        <result column="elevator" property="elevator"/>
+        <result column="wheelchairlift" property="wheelchairlift"/>
+        <result column="parking" property="parking"/>
+        <result column="complaint" property="complaint"/>
+        <result column="exchange" property="exchange"/>
+        <result column="trainreservation" property="trainreservation"/>
+        <result column="culturalspace" property="culturalspace"/>
+        <result column="meeting" property="meeting"/>
+        <result column="lactation" property="lactation"/>
+	</resultMap>
+	
+<select id="getstatus" resultMap="StatusResultMap">
+    SELECT 
+        la.station_name,
+        la.line_name,
+        la.station_id, /* 필터링 확인을 위해 추가 권장 */
+        
+        COALESCE((SELECT COUNT(*) 
+                  FROM storage.incident i 
+                  WHERE i.incident_station_id = la.station_id 
+                    AND i.incident_status IN ('1', '2')), 0) AS incident_count,
+        
+        COALESCE(SUM(li.local_small + li.local_middle + li.local_large), 0) AS total_lockers,
+        COALESCE(SUM((li.local_small + li.local_middle + li.local_large) - 
+                     (lu.able_small + lu.able_middle + lu.able_large)), 0) AS used_lockers,
+        
+        MAX(CASE WHEN la.elevator = 'Y' THEN 'O' ELSE 'X' END) AS elevator,
+        MAX(CASE WHEN la.wheelchairlift = 'Y' THEN 'O' ELSE 'X' END) AS wheelchairlift,
+        MAX(CASE WHEN la.parking = 'Y' THEN 'O' ELSE 'X' END) AS parking,
+        MAX(CASE WHEN la.complaint = 'Y' THEN 'O' ELSE 'X' END) AS complaint,
+        MAX(CASE WHEN la.exchange = 'Y' THEN 'O' ELSE 'X' END) AS exchange,
+        MAX(CASE WHEN la.trainreservation = 'Y' THEN 'O' ELSE 'X' END) AS trainreservation,
+        MAX(CASE WHEN la.culturalspace = 'Y' THEN 'O' ELSE 'X' END) AS culturalspace,
+        MAX(CASE WHEN la.meeting = 'Y' THEN 'O' ELSE 'X' END) AS meeting,
+        MAX(CASE WHEN la.lactation = 'Y' THEN 'O' ELSE 'X' END) AS lactation
+
+    FROM storage.local_amenities la
+    LEFT JOIN storage.local l ON la.station_id = l.station_id
+    LEFT JOIN storage.locker_inventory li ON l.local_id = li.local_id
+    LEFT JOIN (
+        SELECT DISTINCT ON (local_id) * FROM storage.locker_usage 
+        ORDER BY local_id, observed_at DESC
+    ) lu ON l.local_id = lu.local_id
+
+    <where>
+        <if test="auth == '1'">
+            <if test="station_id != null and station_id != ''">
+                AND la.station_id = #{station_id}
+            </if>
+        </if>
+        
+        <if test="auth != '1'">
+            AND la.station_id = #{user_station_id}
+        </if>
+    </where>
+
+    GROUP BY la.station_name, la.line_name, la.station_id
+    ORDER BY la.station_name ASC, la.line_name ASC
+</select>
+</mapper>
