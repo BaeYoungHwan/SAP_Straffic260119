@@ -25,6 +25,7 @@
             <th>호선</th>
             <th v-if="isVisible('incident_count')">장애발생건수</th>
             <th v-if="isVisible('lockers')">물품보관함 (실시간/설치)</th>
+            <th v-if="isVisible('elevator')">엘리베이터</th>
             <th v-if="isVisible('parking')">환승주차장</th>
             <th v-if="isVisible('wheelchair')">휠체어리프트</th>
             <th v-if="isVisible('civil_service')">무인민원발급기</th>
@@ -37,7 +38,7 @@
         </thead>
         <tbody>
           <tr v-if="displayList.length === 0">
-            <td colspan="12" class="no-data">조회된 데이터가 없습니다. 역명 또는 호선을 선택해 주세요.</td>
+            <td colspan="13" class="no-data">조회된 데이터가 없습니다. 역명 또는 호선을 선택해 주세요.</td>
           </tr>
           <tr v-for="item in displayList" :key="item.station_id + item.line_name">
             <td class="bold">{{ item.station_name }}</td>
@@ -50,14 +51,15 @@
             <td v-if="isVisible('lockers')">
               <span class="used-cnt">{{ item.used_lockers }}</span> / {{ item.total_lockers }}개
             </td>
-            <td v-if="isVisible('parking')">{{ formatYN(item.parking) }}</td>
-            <td v-if="isVisible('wheelchair')">{{ formatYN(item.wheelchair) }}</td>
-            <td v-if="isVisible('civil_service')">{{ formatYN(item.civil_service) }}</td>
-            <td v-if="isVisible('currency')">{{ formatYN(item.currency) }}</td>
-            <td v-if="isVisible('train_ticket')">{{ formatYN(item.train_ticket) }}</td>
-            <td v-if="isVisible('culture')">{{ formatYN(item.culture) }}</td>
-            <td v-if="isVisible('meeting')">{{ formatYN(item.meeting) }}</td>
-            <td v-if="isVisible('lactation')">{{ formatYN(item.lactation) }}</td>
+            <td v-if="isVisible('elevator')">{{ formatStatus(item.elevator) }}</td>
+            <td v-if="isVisible('parking')">{{ formatStatus(item.parking) }}</td>
+            <td v-if="isVisible('wheelchair')">{{ formatStatus(item.wheelchairlift) }}</td>
+            <td v-if="isVisible('civil_service')">{{ formatStatus(item.complaint) }}</td>
+            <td v-if="isVisible('currency')">{{ formatStatus(item.exchange) }}</td>
+            <td v-if="isVisible('train_ticket')">{{ formatStatus(item.trainreservation) }}</td>
+            <td v-if="isVisible('culture')">{{ formatStatus(item.culturalspace) }}</td>
+            <td v-if="isVisible('meeting')">{{ formatStatus(item.meeting) }}</td>
+            <td v-if="isVisible('lactation')">{{ formatStatus(item.lactation) }}</td>
           </tr>
         </tbody>
       </table>
@@ -70,12 +72,19 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import SubwaySearch from './SubwaySearch.vue';
 
+// 카테고리 옵션에 엘리베이터(elevator) 추가
 const categoryOptions = [
-  { key: 'incident_count', label: '장애발생건수' }, { key: 'lockers', label: '물품보관함' },
-  { key: 'parking', label: '환승주차장' }, { key: 'wheelchair', label: '휠체어리프트' },
-  { key: 'civil_service', label: '무인민원발급기' }, { key: 'currency', label: '환전키오스크' },
-  { key: 'train_ticket', label: '기차예매역' }, { key: 'culture', label: '문화공간' },
-  { key: 'meeting', label: '만남의장소' }, { key: 'lactation', label: '유아 수유방' }
+  { key: 'incident_count', label: '장애발생건수' }, 
+  { key: 'lockers', label: '물품보관함' },
+  { key: 'elevator', label: '엘리베이터' }, // 추가됨
+  { key: 'parking', label: '환승주차장' }, 
+  { key: 'wheelchair', label: '휠체어리프트' },
+  { key: 'civil_service', label: '무인민원발급기' }, 
+  { key: 'currency', label: '환전키오스크' },
+  { key: 'train_ticket', label: '기차예매역' }, 
+  { key: 'culture', label: '문화공간' },
+  { key: 'meeting', label: '만남의장소' }, 
+  { key: 'lactation', label: '유아 수유방' }
 ];
 
 const selectedCategories = ref(categoryOptions.map(c => c.key));
@@ -88,7 +97,7 @@ const getLineColor = (line) => {
   return colors[line] || '#333';
 };
 
-const formatYN = (val) => (val === 'Y' ? 'O' : 'X');
+const formatStatus = (val) => (val === 'Y' || val === 'O' ? 'O' : 'X');
 const isVisible = (key) => selectedCategories.value.includes(key);
 
 const handleSearch = async (searchData) => {
@@ -108,6 +117,9 @@ const handleSearch = async (searchData) => {
     else if (searchData.type === 'keyword') {
       displayList.value = allData.filter(s => s.station_name.includes(searchData.keyword));
     }
+    else {
+      displayList.value = allData;
+    }
 
     displayList.value.sort((a, b) => a.line_name.localeCompare(b.line_name, undefined, { numeric: true }));
 
@@ -116,6 +128,7 @@ const handleSearch = async (searchData) => {
 </script>
 
 <style scoped>
+/* 기존 스타일 그대로 유지 */
 .status-container { padding: 20px; }
 .category-filter-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -127,4 +140,6 @@ const handleSearch = async (searchData) => {
 .status-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
 .line-badge { color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
 .used-cnt { color: #007bff; font-weight: bold; }
+.bold { font-weight: bold; }
+.no-data { padding: 40px; color: #999; }
 </style>
