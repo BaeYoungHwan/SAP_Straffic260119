@@ -4,8 +4,9 @@
 
 <!-- MyBatis는 Snake(_)인식이 안되므로 강제변환(resultmap) 사용-->
 <mapper namespace="com.mbc.sap.dao.StatusDao">
-	<resultMap id="StatusResultMap" type="com.mbc.sap.dto.StatusDto">
-		<result column="station_name" property="station_name"/>
+    <resultMap id="StatusResultMap" type="com.mbc.sap.dto.StatusDto">
+        <result column="station_id" property="station_id"/> 
+        <result column="station_name" property="station_name"/>
         <result column="line_name" property="line_name"/>
         <result column="incident_count" property="incident_count"/>
         <result column="total_lockers" property="total_lockers"/>
@@ -19,13 +20,20 @@
         <result column="culturalspace" property="culturalspace"/>
         <result column="meeting" property="meeting"/>
         <result column="lactation" property="lactation"/>
-	</resultMap>
+    </resultMap>
+	
+    <select id="getAllStations" resultMap="StatusResultMap">
+        SELECT station_id, station_name, line_name 
+        FROM storage.local_amenities
+        GROUP BY station_id, station_name, line_name
+        ORDER BY line_name ASC, station_name ASC
+    </select>	
 	
 <select id="getstatus" resultMap="StatusResultMap">
     SELECT 
         la.station_name,
         la.line_name,
-        la.station_id, /* 필터링 확인을 위해 추가 권장 */
+        la.station_id,
         
         COALESCE((SELECT COUNT(*) 
                   FROM storage.incident i 
@@ -55,18 +63,18 @@
     ) lu ON l.local_id = lu.local_id
 
     <where>
-        <if test="auth == '1'">
-            <if test="station_id != null and station_id != ''">
+        <choose>
+            <when test="station_id != null and station_id != ''">
                 AND la.station_id = #{station_id}
-            </if>
-        </if>
-        
-        <if test="auth != '1'">
-            AND la.station_id = #{user_station_id}
-        </if>
+            </when>
+            <when test="line_name != null and line_name != ''">
+                AND la.line_name = #{line_name}
+            </when>
+            </choose>
     </where>
 
     GROUP BY la.station_name, la.line_name, la.station_id
-    ORDER BY la.station_name ASC, la.line_name ASC
+    
+    ORDER BY la.line_name ASC, la.station_name ASC 
 </select>
 </mapper>

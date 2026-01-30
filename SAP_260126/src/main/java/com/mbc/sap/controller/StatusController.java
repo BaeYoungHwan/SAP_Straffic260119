@@ -1,10 +1,13 @@
 package com.mbc.sap.controller;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,13 +20,25 @@ public class StatusController {
 	@Autowired
 	StatusService service;
 	
+	// 검색시 해당 역의 대한 현황 List로 불러오기
 	@GetMapping("getstatus")
-	public ResponseEntity<List<StatusDto>> getstatus(
-			@RequestParam("auth") String auth,
-			@RequestParam("station_id") String station_id){
+    public ResponseEntity<List<StatusDto>> getStatus(@RequestParam Map<String, Object> params) {
+        System.out.println("조회 요청 파라미터: " + params);
+
+        List<StatusDto> list = service.getStatusList(params);
+        
+        return ResponseEntity.ok(list);
+    }
+	
+	
+	// DB에 저장된 모든역의 ID,이름,호선을 검색에 이용하기 위해 가져오기
+	@GetMapping("getallstations")
+	public ResponseEntity<List<StatusDto>> getAllStations() {
+		System.out.println("StatusController getallstations 실행: " + new Date());
 		
-		List<StatusDto> list = service.getstatus(auth, station_id);
+		List<StatusDto> list = service.getAllStations();
 		
+		// [수정] 반환 타입을 명확히 하여 JSON 변환 에러 방지
 		return ResponseEntity.ok(list);
 	}
 }

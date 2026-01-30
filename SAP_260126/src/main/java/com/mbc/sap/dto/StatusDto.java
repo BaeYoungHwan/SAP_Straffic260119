@@ -1,6 +1,7 @@
 package com.mbc.sap.dto;
 
 public class StatusDto {
+	private String station_id; 			// 역 ID
 	private String station_name;		// 역명
 	private String line_name;			// 호선
 	
@@ -23,10 +24,11 @@ public class StatusDto {
 		
 	}
 
-	public StatusDto(String station_name, String line_name, int incident_count, int total_lockers, int used_lockers,
-			String elevator, String wheelchairlift, String parking, String complaint, String exchange,
+	public StatusDto(String station_id, String station_name, String line_name, int incident_count, int total_lockers,
+			int used_lockers, String elevator, String wheelchairlift, String parking, String complaint, String exchange,
 			String trainreservation, String culturalspace, String meeting, String lactation) {
 		super();
+		this.station_id = station_id;
 		this.station_name = station_name;
 		this.line_name = line_name;
 		this.incident_count = incident_count;
@@ -41,6 +43,14 @@ public class StatusDto {
 		this.culturalspace = culturalspace;
 		this.meeting = meeting;
 		this.lactation = lactation;
+	}
+
+	public String getStation_id() {
+		return station_id;
+	}
+
+	public void setStation_id(String station_id) {
+		this.station_id = station_id;
 	}
 
 	public String getStation_name() {
@@ -157,12 +167,16 @@ public class StatusDto {
 
 	@Override
 	public String toString() {
-		return "StatusDto [station_name=" + station_name + ", line_name=" + line_name + ", incident_count="
-				+ incident_count + ", total_lockers=" + total_lockers + ", used_lockers=" + used_lockers + ", elevator="
-				+ elevator + ", wheelchairlift=" + wheelchairlift + ", parking=" + parking + ", complaint=" + complaint
-				+ ", exchange=" + exchange + ", trainreservation=" + trainreservation + ", culturalspace="
-				+ culturalspace + ", meeting=" + meeting + ", lactation=" + lactation + "]";
+		return "StatusDto [station_id=" + station_id + ", station_name=" + station_name + ", line_name=" + line_name
+				+ ", incident_count=" + incident_count + ", total_lockers=" + total_lockers + ", used_lockers="
+				+ used_lockers + ", elevator=" + elevator + ", wheelchairlift=" + wheelchairlift + ", parking="
+				+ parking + ", complaint=" + complaint + ", exchange=" + exchange + ", trainreservation="
+				+ trainreservation + ", culturalspace=" + culturalspace + ", meeting=" + meeting + ", lactation="
+				+ lactation + "]";
 	}
+	
+	
+
 	
 	
 }

@@ -1,13 +1,23 @@
 <template>
   <div class="status-container">
-
     <SubwaySearch @search="handleSearch" />
 
     <div class="category-filter-card">
-      <p class="filter-title">항목 필터 설정 <span class="sub-text">(체크박스를 선택하면 해당 컬럼만 노출됩니다)</span></p>
+      <div class="filter-header">
+        <p class="filter-title">항목 필터 설정 <span class="sub-text">(원하지 않는 항목은 체크를 해제하세요)</span></p>
+        <button @click="toggleAll" class="all-select-btn">
+          {{ isAllSelected ? '전체 해제' : '전체 선택' }}
+        </button>
+      </div>
+      
       <div class="checkbox-group">
         <label v-for="cat in categories" :key="cat.key" class="check-label">
-          <input type="checkbox" :value="cat.key" v-model="selectedCategories">
+          <input 
+            type="checkbox" 
+            :value="cat.key" 
+            v-model="selectedCategories"
+            @change="updateAllState"
+          >
           {{ cat.label }}
         </label>
       </div>
@@ -34,27 +44,29 @@
         </thead>
         <tbody>
           <tr v-if="displayList.length === 0">
-            <td colspan="15" class="no-data">상단에서 역을 검색하여 현황을 조회해 주세요.</td>
+            <td :colspan="columnCount" class="no-data">
+              역 또는 호선을 선택하여 현황을 조회해 주세요.
+            </td>
           </tr>
 
           <tr v-for="item in displayList" :key="item.station_id + item.line_name">
             <td class="bold">{{ item.station_name }}</td>
-            <td>{{ item.line_name }}</td>
-            <td v-if="isVisible('incident_count')">{{ item.incident_count }}건</td>
+            <td><span class="line-badge">{{ item.line_name }}</span></td>
             
+            <td v-if="isVisible('incident_count')">{{ item.incident_count }}건</td>
             <td v-if="isVisible('lockers')">
               <span class="blue-text">{{ item.used_lockers }}</span> / {{ item.total_lockers }}
             </td>
 
-            <td v-if="isVisible('elevator')">{{ formatYN(item.elevator) }}</td>
-            <td v-if="isVisible('wheelchairlift')">{{ formatYN(item.wheelchairlift) }}</td>
-            <td v-if="isVisible('parking')">{{ formatYN(item.parking) }}</td>
-            <td v-if="isVisible('complaint')">{{ formatYN(item.complaint) }}</td>
-            <td v-if="isVisible('exchange')">{{ formatYN(item.exchange) }}</td>
-            <td v-if="isVisible('trainreservation')">{{ formatYN(item.trainreservation) }}</td>
-            <td v-if="isVisible('culturalspace')">{{ formatYN(item.culturalspace) }}</td>
-            <td v-if="isVisible('meeting')">{{ formatYN(item.meeting) }}</td>
-            <td v-if="isVisible('lactation')">{{ formatYN(item.lactation) }}</td>
+            <td v-if="isVisible('elevator')">{{ item.elevator }}</td>
+            <td v-if="isVisible('wheelchairlift')">{{ item.wheelchairlift }}</td>
+            <td v-if="isVisible('parking')">{{ item.parking }}</td>
+            <td v-if="isVisible('complaint')">{{ item.complaint }}</td>
+            <td v-if="isVisible('exchange')">{{ item.exchange }}</td>
+            <td v-if="isVisible('trainreservation')">{{ item.trainreservation }}</td>
+            <td v-if="isVisible('culturalspace')">{{ item.culturalspace }}</td>
+            <td v-if="isVisible('meeting')">{{ item.meeting }}</td>
+            <td v-if="isVisible('lactation')">{{ item.lactation }}</td>
           </tr>
         </tbody>
       </table>
@@ -63,11 +75,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
-import SubwaySearch from './SubwaySearch.vue'; // 검색 컴포넌트 임포트 [cite: 2026-01-29]
+import SubwaySearch from './SubwaySearch.vue';
 
-// 1. 카테고리 정의 (10종) [cite: 2026-01-29]
+// 1. 모든 카테고리 정의
 const categories = [
   { key: 'incident_count', label: '장애발생건수' },
   { key: 'lockers', label: '물품보관함' },
@@ -82,67 +94,78 @@ const categories = [
   { key: 'lactation', label: '유아 수유방' }
 ];
 
-const selectedCategories = ref([]); // 선택된 체크박스 키 [cite: 2026-01-29]
-const displayList = ref([]);       // 테이블 데이터 리스트 [cite: 2026-01-29]
+// 2. ⭐ 페이지 로드 시 전체 체크되도록 모든 key를 배열에 기본값으로 설정
+const selectedCategories = ref(categories.map(cat => cat.key));
 
-// 2. 검색 이벤트 처리 (subwaysearch.vue에서 전달받음) [cite: 2026-01-29]
-const handleSearch = async (stationInfo) => {
-  // Proxy 객체에서 실제 데이터만 뽑아옵니다.
-  const targetId = stationInfo.station_id;
-  console.log("실제 보낼 station_id:", targetId); 
+// 3. 전체 선택 버튼 상태도 초기에는 true
+const isAllSelected = ref(true);
 
-  try {
-    const response = await axios.get('http://localhost:9000/getstatus', {
-      params: { 
-        auth: '1', 
-        station_id: targetId  // stationInfo 대신 targetId를 직접 넣으세요.
-      }
-    });
-    displayList.value = response.data;
-  } catch (error) {
-    console.error("조회 실패:", error);
+const displayList = ref([]);
+
+// 필터 노출 로직
+const isVisible = (key) => selectedCategories.value.includes(key);
+
+// 동적 colspan 계산 (역명, 호선 기본 2개 + 선택된 카테고리 수)
+const columnCount = computed(() => selectedCategories.value.length + 2);
+
+// 전체 선택/해제 토글
+const toggleAll = () => {
+  if (isAllSelected.value) {
+    selectedCategories.value = [];
+  } else {
+    selectedCategories.value = categories.map(c => c.key);
   }
-};
-// 3. 필터링 로직: 선택된 게 없으면 전체 노출, 있으면 포함된 것만 [cite: 2026-01-29]
-const isVisible = (key) => {
-  return selectedCategories.value.length === 0 || selectedCategories.value.includes(key);
+  isAllSelected.value = !isAllSelected.value;
 };
 
-// 4. Y/N -> O/X 변환 함수 [cite: 2026-01-29]
-const formatYN = (val) => {
-  return val === 'Y' ? 'O' : 'X';
+// 개별 체크박스 변경 시 전체 선택 상태 동기화
+const updateAllState = () => {
+  isAllSelected.value = selectedCategories.value.length === categories.length;
+};
+
+// 검색 처리
+const handleSearch = async (searchData) => {
+  try {
+    const params = {
+      station_id: searchData.type === 'station' ? searchData.station_id : null,
+      line_name: searchData.type === 'line' ? searchData.line_name : null
+    };
+
+    const res = await axios.get('http://localhost:9000/getstatus', { params });
+    displayList.value = res.data;
+  } catch (err) {
+    console.error("데이터 조회 중 오류 발생:", err);
+  }
 };
 </script>
 
 <style scoped>
 .status-container { padding: 30px; background-color: #f5f7f9; min-height: 100vh; }
-h2 { margin-bottom: 25px; color: #2c3e50; }
 
-/* 카테고리 필터 스타일 */
 .category-filter-card { 
   background: white; padding: 20px; border-radius: 12px; 
-  margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-.filter-title { font-weight: bold; margin-bottom: 15px; }
-.sub-text { font-size: 12px; color: #888; font-weight: normal; }
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; }
-.check-label { cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+.filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.filter-title { font-weight: bold; color: #333; }
+.sub-text { font-size: 12px; color: #888; margin-left: 8px; font-weight: normal; }
 
-/* 테이블 스타일 */
-.table-wrapper { 
-  background: white; border-radius: 12px; overflow-x: auto; 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.all-select-btn {
+  padding: 6px 15px; font-size: 12px; background: #fff; border: 1px solid #dcdfe6;
+  border-radius: 6px; cursor: pointer; transition: 0.2s;
 }
+.all-select-btn:hover { background: #007bff; color: white; border-color: #007bff; }
+
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; }
+.check-label { cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+
+.table-wrapper { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .status-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-.status-table th { 
-  background: #f8f9fa; padding: 15px; font-size: 13px; color: #666; 
-  border-bottom: 2px solid #edf0f2; text-align: center;
-}
-.status-table td { 
-  padding: 15px; text-align: center; border-bottom: 1px solid #f1f1f1; 
-  font-size: 14px; color: #333;
-}
-.bold { font-weight: bold; }
+.status-table th { background: #f8f9fa; padding: 15px; font-size: 13px; color: #666; border-bottom: 2px solid #edf0f2; }
+.status-table td { padding: 15px; text-align: center; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+
+.line-badge { background: #eef6ff; color: #007bff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.bold { font-weight: bold; color: #222; }
 .blue-text { color: #007bff; font-weight: bold; }
-.no-data { padding: 60px 0; color: #999; }
+.no-data { padding: 100px 0; color: #aaa; text-align: center; font-size: 15px; }
 </style>

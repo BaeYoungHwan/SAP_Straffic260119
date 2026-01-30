@@ -1,6 +1,7 @@
 package com.mbc.sap.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,8 +13,12 @@ import com.mbc.sap.dto.StatusDto;
 @Repository
 public interface StatusDao {
 	
-	public List<StatusDto> getstatus(
-			@Param("auth") String auth,
-		    @Param("user_station_id") String user_station_id);
+	List<StatusDto> getAllStations();
+	
+	List<StatusDto> getstatus(
+	        @Param("station_id") String station_id, 
+	        @Param("line_name") String line_name
+	    );
+	
 		
 }
