@@ -4,20 +4,14 @@
 
     <div class="category-filter-card">
       <div class="filter-header">
-        <p class="filter-title">항목 필터 설정 <span class="sub-text">(원하지 않는 항목은 체크를 해제하세요)</span></p>
-        <button @click="toggleAll" class="all-select-btn">
+        <h3 class="filter-title">데이터 노출 항목 설정</h3>
+        <button @click="toggleAllCategories" class="toggle-all-btn">
           {{ isAllSelected ? '전체 해제' : '전체 선택' }}
         </button>
       </div>
-      
       <div class="checkbox-group">
-        <label v-for="cat in categories" :key="cat.key" class="check-label">
-          <input 
-            type="checkbox" 
-            :value="cat.key" 
-            v-model="selectedCategories"
-            @change="updateAllState"
-          >
+        <label v-for="cat in categoryOptions" :key="cat.key" class="check-label">
+          <input type="checkbox" :value="cat.key" v-model="selectedCategories">
           {{ cat.label }}
         </label>
       </div>
@@ -30,43 +24,40 @@
             <th>역명</th>
             <th>호선</th>
             <th v-if="isVisible('incident_count')">장애발생건수</th>
-            <th v-if="isVisible('lockers')">물품보관함 (사용/설치)</th>
-            <th v-if="isVisible('elevator')">엘리베이터</th>
-            <th v-if="isVisible('wheelchairlift')">휠체어리프트</th>
+            <th v-if="isVisible('lockers')">물품보관함 (실시간/설치)</th>
             <th v-if="isVisible('parking')">환승주차장</th>
-            <th v-if="isVisible('complaint')">무인민원발급기</th>
-            <th v-if="isVisible('exchange')">환전키오스크</th>
-            <th v-if="isVisible('trainreservation')">기차예매역</th>
-            <th v-if="isVisible('culturalspace')">문화공간</th>
+            <th v-if="isVisible('wheelchair')">휠체어리프트</th>
+            <th v-if="isVisible('civil_service')">무인민원발급기</th>
+            <th v-if="isVisible('currency')">환전키오스크</th>
+            <th v-if="isVisible('train_ticket')">기차예매역</th>
+            <th v-if="isVisible('culture')">문화공간</th>
             <th v-if="isVisible('meeting')">만남의장소</th>
             <th v-if="isVisible('lactation')">유아 수유방</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="displayList.length === 0">
-            <td :colspan="columnCount" class="no-data">
-              역 또는 호선을 선택하여 현황을 조회해 주세요.
-            </td>
+            <td colspan="12" class="no-data">조회된 데이터가 없습니다. 역명 또는 호선을 선택해 주세요.</td>
           </tr>
-
           <tr v-for="item in displayList" :key="item.station_id + item.line_name">
             <td class="bold">{{ item.station_name }}</td>
-            <td><span class="line-badge">{{ item.line_name }}</span></td>
-            
-            <td v-if="isVisible('incident_count')">{{ item.incident_count }}건</td>
-            <td v-if="isVisible('lockers')">
-              <span class="blue-text">{{ item.used_lockers }}</span> / {{ item.total_lockers }}
+            <td>
+              <span class="line-badge" :style="{ backgroundColor: getLineColor(item.line_name) }">
+                {{ item.line_name }}
+              </span>
             </td>
-
-            <td v-if="isVisible('elevator')">{{ item.elevator }}</td>
-            <td v-if="isVisible('wheelchairlift')">{{ item.wheelchairlift }}</td>
-            <td v-if="isVisible('parking')">{{ item.parking }}</td>
-            <td v-if="isVisible('complaint')">{{ item.complaint }}</td>
-            <td v-if="isVisible('exchange')">{{ item.exchange }}</td>
-            <td v-if="isVisible('trainreservation')">{{ item.trainreservation }}</td>
-            <td v-if="isVisible('culturalspace')">{{ item.culturalspace }}</td>
-            <td v-if="isVisible('meeting')">{{ item.meeting }}</td>
-            <td v-if="isVisible('lactation')">{{ item.lactation }}</td>
+            <td v-if="isVisible('incident_count')">{{ item.incident_count }}개</td>
+            <td v-if="isVisible('lockers')">
+              <span class="used-cnt">{{ item.used_lockers }}</span> / {{ item.total_lockers }}개
+            </td>
+            <td v-if="isVisible('parking')">{{ formatYN(item.parking) }}</td>
+            <td v-if="isVisible('wheelchair')">{{ formatYN(item.wheelchair) }}</td>
+            <td v-if="isVisible('civil_service')">{{ formatYN(item.civil_service) }}</td>
+            <td v-if="isVisible('currency')">{{ formatYN(item.currency) }}</td>
+            <td v-if="isVisible('train_ticket')">{{ formatYN(item.train_ticket) }}</td>
+            <td v-if="isVisible('culture')">{{ formatYN(item.culture) }}</td>
+            <td v-if="isVisible('meeting')">{{ formatYN(item.meeting) }}</td>
+            <td v-if="isVisible('lactation')">{{ formatYN(item.lactation) }}</td>
           </tr>
         </tbody>
       </table>
@@ -79,93 +70,61 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import SubwaySearch from './SubwaySearch.vue';
 
-// 1. 모든 카테고리 정의
-const categories = [
-  { key: 'incident_count', label: '장애발생건수' },
-  { key: 'lockers', label: '물품보관함' },
-  { key: 'elevator', label: '엘리베이터' },
-  { key: 'wheelchairlift', label: '휠체어리프트' },
-  { key: 'parking', label: '환승주차장' },
-  { key: 'complaint', label: '무인민원발급기' },
-  { key: 'exchange', label: '환전키오스크' },
-  { key: 'trainreservation', label: '기차예매역' },
-  { key: 'culturalspace', label: '문화공간' },
-  { key: 'meeting', label: '만남의장소' },
-  { key: 'lactation', label: '유아 수유방' }
+const categoryOptions = [
+  { key: 'incident_count', label: '장애발생건수' }, { key: 'lockers', label: '물품보관함' },
+  { key: 'parking', label: '환승주차장' }, { key: 'wheelchair', label: '휠체어리프트' },
+  { key: 'civil_service', label: '무인민원발급기' }, { key: 'currency', label: '환전키오스크' },
+  { key: 'train_ticket', label: '기차예매역' }, { key: 'culture', label: '문화공간' },
+  { key: 'meeting', label: '만남의장소' }, { key: 'lactation', label: '유아 수유방' }
 ];
 
-// 2. ⭐ 페이지 로드 시 전체 체크되도록 모든 key를 배열에 기본값으로 설정
-const selectedCategories = ref(categories.map(cat => cat.key));
-
-// 3. 전체 선택 버튼 상태도 초기에는 true
-const isAllSelected = ref(true);
-
+const selectedCategories = ref(categoryOptions.map(c => c.key));
 const displayList = ref([]);
+const isAllSelected = computed(() => selectedCategories.value.length === categoryOptions.length);
+const toggleAllCategories = () => { selectedCategories.value = isAllSelected.value ? [] : categoryOptions.map(c => c.key); };
 
-// 필터 노출 로직
+const getLineColor = (line) => {
+  const colors = { '1호선': '#0052A4', '2호선': '#00A84D', '3호선': '#EF7C1C', '4호선': '#00A5DE', '5호선': '#996CAC', '6호선': '#CD7C2F', '7호선': '#747F28', '8호선': '#E6186C', '9호선': '#BDB092' };
+  return colors[line] || '#333';
+};
+
+const formatYN = (val) => (val === 'Y' ? 'O' : 'X');
 const isVisible = (key) => selectedCategories.value.includes(key);
 
-// 동적 colspan 계산 (역명, 호선 기본 2개 + 선택된 카테고리 수)
-const columnCount = computed(() => selectedCategories.value.length + 2);
-
-// 전체 선택/해제 토글
-const toggleAll = () => {
-  if (isAllSelected.value) {
-    selectedCategories.value = [];
-  } else {
-    selectedCategories.value = categories.map(c => c.key);
-  }
-  isAllSelected.value = !isAllSelected.value;
-};
-
-// 개별 체크박스 변경 시 전체 선택 상태 동기화
-const updateAllState = () => {
-  isAllSelected.value = selectedCategories.value.length === categories.length;
-};
-
-// 검색 처리
 const handleSearch = async (searchData) => {
   try {
-    const params = {
-      station_id: searchData.type === 'station' ? searchData.station_id : null,
-      line_name: searchData.type === 'line' ? searchData.line_name : null
-    };
+    const res = await axios.get('http://localhost:9000/get_status');
+    let allData = res.data;
 
-    const res = await axios.get('http://localhost:9000/getstatus', { params });
-    displayList.value = res.data;
-  } catch (err) {
-    console.error("데이터 조회 중 오류 발생:", err);
-  }
+    if (searchData.type === 'station') {
+      displayList.value = allData.filter(s => s.station_id === searchData.station_id);
+    } 
+    else if (searchData.type === 'line') {
+      displayList.value = allData.filter(s => {
+        const matchLine = s.line_name === searchData.line_name;
+        return searchData.keyword ? (matchLine && s.station_name.includes(searchData.keyword)) : matchLine;
+      });
+    } 
+    else if (searchData.type === 'keyword') {
+      displayList.value = allData.filter(s => s.station_name.includes(searchData.keyword));
+    }
+
+    displayList.value.sort((a, b) => a.line_name.localeCompare(b.line_name, undefined, { numeric: true }));
+
+  } catch (err) { console.error("데이터 로드 실패:", err); }
 };
 </script>
 
 <style scoped>
-.status-container { padding: 30px; background-color: #f5f7f9; min-height: 100vh; }
-
-.category-filter-card { 
-  background: white; padding: 20px; border-radius: 12px; 
-  margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
+.status-container { padding: 20px; }
+.category-filter-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.filter-title { font-weight: bold; color: #333; }
-.sub-text { font-size: 12px; color: #888; margin-left: 8px; font-weight: normal; }
-
-.all-select-btn {
-  padding: 6px 15px; font-size: 12px; background: #fff; border: 1px solid #dcdfe6;
-  border-radius: 6px; cursor: pointer; transition: 0.2s;
-}
-.all-select-btn:hover { background: #007bff; color: white; border-color: #007bff; }
-
+.toggle-all-btn { padding: 5px 12px; font-size: 12px; cursor: pointer; background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; }
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; }
-.check-label { cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; }
-
-.table-wrapper { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.status-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-.status-table th { background: #f8f9fa; padding: 15px; font-size: 13px; color: #666; border-bottom: 2px solid #edf0f2; }
-.status-table td { padding: 15px; text-align: center; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
-
-.line-badge { background: #eef6ff; color: #007bff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-.bold { font-weight: bold; color: #222; }
-.blue-text { color: #007bff; font-weight: bold; }
-.no-data { padding: 100px 0; color: #aaa; text-align: center; font-size: 15px; }
+.table-wrapper { background: #fff; border-radius: 12px; overflow-x: auto; border: 1px solid #eee; }
+.status-table { width: 100%; border-collapse: collapse; text-align: center; min-width: 1000px; }
+.status-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #eee; font-size: 14px; }
+.status-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+.line-badge { color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.used-cnt { color: #007bff; font-weight: bold; }
 </style>
