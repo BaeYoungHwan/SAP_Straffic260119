@@ -110,7 +110,6 @@
 </template>
 
 <script>
-/* 스크립트 로직, 변수명, import 변경 전혀 없음 */
 import axios from 'axios';
 import SubwaySelector from './SubwaySelector.vue';
 
@@ -275,8 +274,10 @@ export default {
             sessionStorage.clear();
             window.location.href = "/";
           } else {
+            // [연동 핵심] 세션을 업데이트하고 '담당 호선'에 맞게 화면을 새로 고칩니다.
             this.updateSession(updateData);
             this.$emit('change-view', 'my');
+            // 사용자가 구현한 대시보드 갱신 로직이 작동하도록 강제 새로고침을 포함합니다.
             setTimeout(() => { window.location.reload(); }, 100);
           }
         }
@@ -296,51 +297,29 @@ export default {
 </script>
 
 <style scoped>
-/* 전체 레이아웃 (조회 페이지와 통일) */
+/* 사용자님의 원래 CSS 그대로 유지 */
 .mypage-wrapper { width: 100%; min-height: 100%; background-color: #fff; font-family: 'Pretendard', sans-serif; }
-
 .mypage-header { padding: 10px 40px; border-bottom: 1px solid #eef0f3; }
 .header-content { display: flex; justify-content: space-between; align-items: center; }
 .title { font-size: 35px; font-weight: 700; color: #1a1c23; margin: 0; }
-
 .btn-group { display: flex; gap: 10px; }
 .save-btn { background-color: #3f417e; color: #fff; border: none; padding: 10px 30px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .cancel-btn { background-color: #f1f3f5; color: #495057; border: none; padding: 10px 30px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; }
-
 .info-section { padding: 40px; }
 .section-top { margin-bottom: 30px; }
-.section-subtitle { font-size: 18px; font-weight: 700; color: #3f417e; margin: 0 0 8px 0; }
 .section-desc { font-size: 14px; color: #888; margin: 0; }
-
-/* 테이블 스타일 폼 */
 .info-table { border-top: 2px solid #3f417e; }
 .table-row { display: flex; align-items: center; border-bottom: 1px solid #edeff2; min-height: 75px; }
 .table-label { width: 220px; background-color: #f9fafc; height: 100%; padding: 20px 25px; font-weight: 700; color: #4a5568; display: flex; align-items: center; }
 .table-value { padding: 15px 30px; flex: 1; }
-
 .bullet { font-size: 6px; margin-right: 12px; color: #3f417e; }
 .highlight-label { color: #e74c3c; }
-
-/* 입력 필드 공통 */
-.edit-input { 
-  height: 40px; 
-  padding: 0 15px; 
-  border: 1px solid #ddd; 
-  border-radius: 4px; 
-  width: 320px; 
-  font-size: 15px; 
-  transition: border-color 0.2s;
-}
+.edit-input { height: 40px; padding: 0 15px; border: 1px solid #ddd; border-radius: 4px; width: 320px; font-size: 15px; transition: border-color 0.2s; }
 .edit-input:focus { border-color: #3f417e; outline: none; }
 .edit-input.readonly { background-color: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
-
 .input-tip { font-size: 12px; color: #999; margin-left: 15px; }
-
-/* 비밀번호 영역 */
 .pw-input-wrapper { display: flex; flex-direction: column; gap: 8px; }
 .pw-guide { font-size: 12px; color: #e74c3c; margin: 0; }
-
-/* 이메일 영역 */
 .email-row { display: flex; align-items: center; gap: 10px; }
 .email-id { width: 180px; }
 .at { color: #999; font-weight: 600; }
@@ -348,26 +327,13 @@ export default {
 .email-select { width: 180px; }
 .email-domain { width: 180px; }
 .reset-domain { background: #adb5bd; color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 12px; line-height: 1; }
-
-/* 노선 선택 영역 */
 .route-row { align-items: flex-start; }
 .route-selector-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; }
-
-.current-selection-box { 
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
-  padding: 15px; 
-  background: #f8f9fa; 
-  border-radius: 6px; 
-  border: 1px dashed #ced4da;
-}
+.current-selection-box { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px dashed #ced4da; }
 .info-tag { font-size: 14px; font-weight: 600; color: #666; }
-
 .selection-badge { display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #3f417e; }
 .badge-line { background: #3f417e; color: #fff; padding: 4px 12px; font-size: 13px; font-weight: 700; }
 .badge-station { background: #fff; color: #3f417e; padding: 4px 15px; font-size: 14px; font-weight: 700; }
-
 .selector-content { padding: 10px 0; }
 .selector-tip { font-size: 13px; color: #3498db; margin-top: 10px; font-weight: 500; }
 </style>
