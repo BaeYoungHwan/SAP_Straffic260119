@@ -228,18 +228,35 @@ const initCharts = () => {
         });
       });
     } else {
-      datasets.push({
-        type: 'bar', label: `${userLine.value}호선 전체`, backgroundColor: getLineColor(userLine.value) + '80', order: 2,
-        data: matchKeys.map(k => weeklyData.filter(d => (d.day || d.event_date || "").includes(k) && String(d.line_num || d.line_name).includes(userLine.value)).reduce((a, c) => a + Number(c.count || 0), 0))
-      });
-      datasets.push({
-        type: 'line', label: '본인 역', borderColor: '#FF6384', borderWidth: 4, tension: 0.3, order: 1,
-        data: matchKeys.map(k => {
-          const found = weeklyData.find(d => (d.day || d.event_date || "").includes(k) && String(d.station_id) === String(data.station_id));
-          return found ? Number(found.count) : 0;
-        })
-      });
-    }
+  // 1. 담당 호선 전체 막대 (Bar)
+  datasets.push({
+    type: 'bar',
+    label: `${userLine.value}호선 전체`,
+    backgroundColor: getLineColor(userLine.value) + '80', // 투명도 50%
+    order: 2,
+    data: matchKeys.map(k => {
+      return weeklyData
+        .filter(d => d.event_date === k && String(d.line_name).includes(userLine.value))
+        .reduce((sum, curr) => sum + Number(curr.count || 0), 0);
+    })
+  });
+
+  // 2. 본인 역 라인 (Line)
+  datasets.push({
+    type: 'line',
+    label: '본인 역',
+    borderColor: '#FF6384',
+    borderWidth: 4,
+    tension: 0.3,
+    order: 1,
+    data: matchKeys.map(k => {
+      // station_id가 백엔드 SQL 결과와 프론트의 data.station_id와 일치하는지 확인
+      return weeklyData
+        .filter(d => d.event_date === k && String(d.station_id) === String(data.station_id))
+        .reduce((sum, curr) => sum + Number(curr.count || 0), 0);
+    })
+  });
+}
 
     weeklyChartInstance = new Chart(ctxWeekly, {
       data: { labels, datasets },
