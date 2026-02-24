@@ -126,39 +126,30 @@
 <select id="getWeeklyIncidents" resultType="map">
     <choose>
         <when test='auth == "1"'>
-    SELECT 
-        target_line AS line_name,
-        event_date,
-        COUNT(*) AS count
-    FROM (
-        SELECT DISTINCT  /* 중복 카운팅 방지 */
-            i.incident_id,
-            TO_CHAR(i.create_at, 'YYYY-MM-DD') AS event_date,
-            COALESCE(
-                NULLIF(i.incident_line_name, ''), 
-                NULLIF(l.line_name, ''),
-                NULLIF(i.incident_station_name, ''),
-                '미분류'
-            ) AS target_line
-        FROM storage.incident i
-        LEFT JOIN storage.local l ON TRIM(i.incident_station_name) = TRIM(l.station_name)
-        WHERE i.create_at >= CURRENT_DATE - INTERVAL '7 days'
-    ) AS sub
-    WHERE target_line IS NOT NULL AND target_line != ''
-    GROUP BY target_line, event_date
-    ORDER BY event_date ASC, target_line ASC
-</when>
-
+            SELECT 
+                target_line AS line_name,
+                event_date,
+                COUNT(*) AS count
+            FROM (
+                SELECT 
+                    TO_CHAR(i.create_at, 'YYYY-MM-DD') AS event_date,
+                    COALESCE(NULLIF(i.incident_line_name, ''), '미분류') AS target_line
+                FROM storage.incident i
+                WHERE i.create_at >= CURRENT_DATE - INTERVAL '7 days'
+            ) AS sub
+            GROUP BY target_line, event_date
+            ORDER BY event_date ASC
+        </when>
         <otherwise>
             SELECT 
                 incident_line_name AS line_name,
+                incident_station_id AS station_id,
                 TO_CHAR(create_at, 'YYYY-MM-DD') AS event_date,
                 COUNT(*) AS count
             FROM storage.incident
-            WHERE incident_station_id = #{station_id}
+            WHERE incident_line_name = (SELECT line_name FROM storage.local WHERE station_id = #{station_id} LIMIT 1)
               AND create_at >= CURRENT_DATE - INTERVAL '7 days'
-              AND incident_line_name IS NOT NULL
-            GROUP BY incident_line_name, event_date
+            GROUP BY incident_line_name, incident_station_id, event_date
             ORDER BY event_date ASC
         </otherwise>
     </choose>
