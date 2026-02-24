@@ -106,7 +106,7 @@ spring:
 ---
 
 ### 화면
-
+<img src="SAP_시연영상.gif" width="70%">
 <img src="./doc/화면캡처/1. 로그인.png" width="500px" alt="로그인">
 <img src="./doc/화면캡처/2. 대시보드.png" width="500px" alt="대시보드">
 <img src="./doc/화면캡처/3. 마이페이지.png" width="500px" alt="마이페이지">

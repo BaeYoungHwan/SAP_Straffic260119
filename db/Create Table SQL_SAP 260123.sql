@@ -113,11 +113,11 @@
 --     CONSTRAINT weather_pkey PRIMARY KEY (tm)
 -- );
 
-select * from storage.weather;
+select * from storage.weather order by reg_dt desc;
 
 select * from storage.local_amenities;
 select * from storage.incident;
-select * from storage.locker_usage order by locker_usage.created_at desc
+select * from storage.locker_usage order by locker_usage.created_at desc;
 
 --update storage.user set user_name = 'Master' where user_id ='admin'
 
